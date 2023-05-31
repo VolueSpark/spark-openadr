@@ -1,0 +1,1538 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/pajarito/OpenADR-REST/1.0.0
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/pajarito/OpenAPI-3.0/1.0.0
+info:
+  title: OpenADR REST Demand Response API
+  version: "1.0.0"
+  description: |
+    The OpenADR REST API supports energy retailer to energy customer Demand Response programs.
+    The API includes the following capabilities and operations:
+
+    __Manage programs:__
+
+    * Create/Update/Delete a program
+    * Search programs
+
+    __Manage Events:__
+
+    * Create/Update/Delete an event
+    * Search events
+
+    __Manage reports:__
+
+    * Create/Update/Delete a report
+    * Search reports
+
+    __Manage subscriptions:__
+
+    * Create/Update/Delete subscriptions to programs, events, and reports
+    * Subscriptions allows clients to register a callback URL (webhook) to be notified
+      on the change of state of a resource
+  contact:
+    email: frank@pajaritotech.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /programs:
+    get:
+      tags:
+        - programs
+      summary: searches all programs
+      operationId: searchAllPrograms
+      description: |
+        List all programs known to the server.
+        Use no_defaults query param to view representation w no default values.
+        Use skip and pagination query params to limit reponse size.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: no_defaults
+        in: query
+        description: return representations that do not include attributes with default values.
+        required: false
+        schema:
+          type: boolean
+      - name: skip
+        in: query
+        description: number of records to skip for pagination.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      - name: limit
+        in: query
+        description: maximum number of records to return.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          maximum: 50
+          minimum: 0
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/program'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /programs/{programID}:
+    parameters:
+      - name: programID
+        in: path
+        schema:
+          type: integer
+          format: int32
+        required: true
+        description: Numeric ID of the program object.
+        example: 999
+    get:
+      tags:
+        - programs
+      summary: searches programs by program ID
+      operationId: searchProgramByProgramId
+      description:  |
+        Fetch the program specified by the programID in path.
+        Use no_defaults query param to view representation w no default values.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: no_defaults
+        in: query
+        description: return representations that do not include attributes with default values.
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/program'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /reports:
+    post:
+      tags:
+        - reports
+      summary: add a report
+      operationId: createReport
+      description: Create a new report in the server.
+      security:
+        - oAuth2ClientCredentials: [write_reports]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/report'
+        description: report item to add.
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/report'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /events:
+    get:
+      tags:
+        - events
+      summary: searches all events
+      operationId: searchAllEvents
+      description: |
+        List all events known to the server. May filter results by programID query param.
+        Use skip and pagination query params to limit reponse size.
+        Use no_defaults query param to view represenation w no default values.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: programID
+        in: query
+        schema:
+          type: integer
+          format: int32
+        required: false
+        description: Numeric ID of the associated program.
+        example: 999
+      - name: no_defaults
+        in: query
+        description: return representations that do not include attributes with default values.
+        required: false
+        schema:
+          type: boolean
+      - name: skip
+        in: query
+        description: number of records to skip for pagination.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+      - name: limit
+        in: query
+        description: maximum number of records to return.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          maximum: 50
+          minimum: 0
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/event'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /events/{eventID}:
+    parameters:
+      - name: eventID
+        in: path
+        schema:
+          type: integer
+          format: int32
+        description: event ID.
+        required: true
+        example: 999
+    get:
+      tags:
+        - events
+      summary: search events by ID
+      operationId: searchEventsByID
+      description: |
+        Fetch event associated with the eventID in path.
+        Use no_defaults query param to view representation w no default values.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: no_defaults
+        in: query
+        description: return representations that do not include attributes with default values.
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/event'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /subscriptions:
+    get:
+      tags:
+        - subscriptions
+      summary: search subscriptions
+      operationId: searchSubscriptions
+      description: |
+        List all subscriptions.
+        May filter results by programID and clientID as query params.
+        May filter results by resourceTypes as query param. ResoureTypes are PROGRAM, REPORT, EVENT.
+        Use skip and pagination query params to limit reponse size.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: programID
+        in: query
+        description: filter results to subscriptions with programID of associated value.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          example: 0
+      - name: clientID
+        in: query
+        description: filter results to subscriptions with clientID of associated value.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          example: 0
+      - name: resourceTypes
+        in: query
+        description: filter results to subscriptions with resourceTypes of associated values.
+        example: resourceTypes=PROGRAM, EVENT
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum: [
+              PROGRAM,
+              REPORT,
+              EVENT
+            ]
+        style: form
+        explode: false
+      - name: skip
+        in: query
+        description: number of records to skip for pagination.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    post:
+      tags:
+        - subscriptions
+      summary: create subscription
+      operationId: createSubscription
+      description: Create a new subscription.
+      security:
+        - oAuth2ClientCredentials: [write_subscriptions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/subscription'
+      callbacks:   # Callback definition
+        notifyEvent:   # callback Event name
+          '{$request.body#/callbackUrl}':   # The callback URL,Refers to the passed URL
+            post:
+              requestBody:   # Contents of the callback message
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/notification'
+              responses:   # Expected responses to the callback message
+                '200':
+                  description: Your server returns this code if it accepts the callback.
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /subscriptions/{subscriptionID}:
+    parameters:
+      - name: subscriptionID
+        in: path
+        description: Numeric ID of the associated subscription.
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 999
+    get:
+      tags:
+        - subscriptions
+      summary: search subscriptions by ID
+      operationId: searchSubscriptionByID
+      description: Return the subscription specified by subscriptionID specified in path.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    put:
+      tags:
+        - subscriptions
+      summary: update  subscription
+      operationId: updateSubscription
+      description: Update the subscription specified by subscriptionID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_subscriptions]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    delete:
+      tags:
+        - subscriptions
+      summary: delete  subscription
+      operationId: deleteSubscription
+      description: Delete the subscription specified by subscriptionID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_subscriptions]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /vens:
+    get:
+      tags:
+        - vens
+      summary: search vens
+      operationId: searchVens
+      description: |
+        List all vens.
+        Use skip and pagination query params to limit reponse size.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      parameters:
+      - name: skip
+        in: query
+        description: number of records to skip for pagination.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    post:
+      tags:
+        - vens
+      summary: create ven
+      operationId: createVen
+      description: Create a new ven.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ven'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /vens/{venID}:
+    parameters:
+      - name: venID
+        in: path
+        description: Numeric ID of the associated ven.
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 999
+    get:
+      tags:
+        - vens
+      summary: search vens by ID
+      operationId: searchVenByID
+      description: Return the ven specified by venID specified in path.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    put:
+      tags:
+        - vens
+      summary: update  ven
+      operationId: updateVen
+      description: Update the ven specified by venID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    delete:
+      tags:
+        - vens
+      summary: delete  ven
+      operationId: deleteVen
+      description: Delete the ven specified by venID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /vens/{venID}/resources:
+    parameters:
+      - name: venID
+        in: path
+        description: Numeric ID of the associated ven.
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 999
+    get:
+      tags:
+        - vens
+      summary: search ven resources
+      operationId: searchVenResources
+      description: Return the ven resources specified by venID specified in path.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resource'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    post:
+      tags:
+        - vens
+      summary: create resource
+      operationId: createResource
+      description: Create a new resource.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resource'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/resource'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /vens/{venID}/resources/{resourceID}:
+    parameters:
+      - name: venID
+        in: path
+        description: Numeric ID of the associated ven.
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 999
+      - name: resourceID
+        in: path
+        description: Numeric ID of the associated resource.
+        required: true
+        schema:
+          type: integer
+          format: int32
+          example: 999
+    get:
+      tags:
+        - vens
+      summary: search ven resources by ID
+      operationId: searchVenResourceByID
+      description: Return the ven resource specified by venID and resourceID specified in path.
+      security:
+        - oAuth2ClientCredentials: [read_all]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resource'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    put:
+      tags:
+        - vens
+      summary: update  ven resource
+      operationId: updateVenResource
+      description: Update the ven resource specified by venID and resourceID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+    delete:
+      tags:
+        - vens
+      summary: delete  ven resource
+      operationId: deleteVenResource
+      description: Delete the ven resource specified by venID and resourceID specified in path.
+      security:
+        - oAuth2ClientCredentials: [write_vens]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ven'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+  /auth/token:
+    get:
+      parameters:
+        - name: clientID
+          in: query
+          description: client ID to exchange for bearer token.
+          required: true
+          schema:
+            type: string
+            example: ven_client
+        - name: clientSecret
+          in: query
+          description: client secret to exchange for bearer token.
+          required: true
+          schema:
+            type: integer
+            example: 999
+      tags:
+        - Auth
+      summary: fetch a token
+      operationId: fetchToken
+      description: Return an access token based on clientID and clientSecret
+      # security:
+      #   - oAuth2ClientCredentials: [bl, ven]
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/problem'
+components:
+  schemas:
+    program:
+      type: object
+      description: Provides program specific metadata from VTN to VEN.
+      example: {"programName": {}}
+      required:
+        - programName
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: |
+            Creation time for object.
+            server provisions timestamp string on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: |
+            Modification time for object.
+            server provisions timestamp string on object modification.
+        programName:
+          type: string
+          example: ResTOU
+          description: Name of program with which this event is associated.
+        programLongName:
+          type: string
+          example: "Residential Time of Use-A"
+          description: User provided ID.
+        retailerName:
+          type: string
+          example: ACME
+          description: Program defined ID.
+        retailerLongName:
+          type: string
+          example: ACME Electric Inc.
+          description: Program defined ID.
+        programType:
+          type: string
+          example: PRICING_TARIFF
+          description: User defined string categorizing the program.
+        country:
+          type: string
+          example: US
+          description: Alpha-2 code per ISO 3166-1.
+        principalSubdivision:
+          type: string
+          example: CO
+          description: Coding per ISO 3166-2. E.g. state in US.
+        timeZoneOffset:
+          type: string
+          example: PT7H
+          description:  Number of hours different from UTC for the standard time applicable to the program.
+          default: null
+        intervalPeriod:
+          $ref: '#/components/schemas/intervalPeriod'
+          # The temporal span of the program, could be years long.
+        programDescriptions:
+          type: array
+          items:
+            required:
+              - URL
+            properties:
+              URL:
+                type: string
+                example: www.myCorporation.com/myProgramDescription
+          description: List of URLs to human and/or machine readable content.
+        bindingEvents:
+          type: boolean
+          description: True if events are fixed once transmitted.
+          default: false
+        localPrice:
+          type: boolean
+          description: True if events have been adapted from a grid event.
+          default: false
+        payloadDescriptors:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/eventPayloadDescriptor'
+              - $ref: '#/components/schemas/reportPayloadDescriptor'
+          # An optional list of objects that provide context to payload types
+    report:
+      type: object
+      description: report object.
+      example: {"programID": 99, "eventID": 99, "clientID": 999}
+      required:
+        - programID
+        - eventID
+        - clientID
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object modification.
+        programID:
+          $ref: '#/components/schemas/objectID'
+          # ID attribute of program object this report is associated with.
+        eventID:
+          $ref: '#/components/schemas/objectID'
+          # ID attribute of event object this report is associated with.
+        clientID:
+          $ref: '#/components/schemas/objectID'
+        name:
+          type: string
+          example: Battery_usage_04112023
+          description: User defined string for use in debugging or UI.
+        payloadDescriptors:
+          type: array
+          items:
+            $ref: '#/components/schemas/reportPayloadDescriptor'
+        resources:
+          type: array
+          example: [{"resourceID": 0, "intervalPeriod": None, "intervals": None}]
+          items:
+            type: object
+            description: report data associated with a resource.
+            required:
+              - resourceID
+            properties:
+              resourceID:
+                type: integer
+                format: int32
+                example: 99
+                description: User provided resource ID. A negative value indicates an aggregation of multipe resources.
+              intervalPeriod:
+                $ref: '#/components/schemas/intervalPeriod'
+              intervals:
+                type: array
+                items:
+                  $ref: '#/components/schemas/interval'
+          description: An array of objects containing report data for a set of resources.
+    event:
+      type: object
+      description: |
+        Event object to communicate a Demand Response request to VEN.
+        If intervalPeriod is present, sets start time and duration of intervals.
+      example: {"programID": 99, 'intervals': {"ID": 0, "payloads": [{"payloadType": "SIMPLE", "values":[0]}]}}
+      required:
+        - programID
+        - intervals
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object modification.
+        programID:
+          $ref: '#/components/schemas/objectID'
+          # ID attribute of program object this event is associated with.
+        name:
+          type: string
+          example: price event 11-18-2022
+          description: User defined string for use in debugging or UI.
+        priority:
+          type: integer
+          example: 0
+          description: relative priority of event. A lower number is a higher priority.
+        targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/target'
+          description: An array of target objects
+        reportDescriptors:
+          type: array
+          items:
+            $ref: '#/components/schemas/reportDescriptor'
+          description: An array of reportDescriptor objects. Used to request reports from VEN.
+        payloadDescriptors:
+          type: array
+          items:
+            $ref: '#/components/schemas/eventPayloadDescriptor'
+          description: An array of payloadDescriptor objects
+        intervalPeriod:
+          $ref: '#/components/schemas/intervalPeriod'
+          # Defines default start and durations of intervals
+        intervals:
+          type: array
+          items:
+            $ref: '#/components/schemas/interval'
+          description: An array of interval objects
+    subscription:
+      type: object
+      description: |
+        An object created by a client to receive notification of operations on objects.
+        Clients may subscribe to be notified when a type of resource is created,
+        updated, or deleted. Note that while a single subscription may be asscociated
+        with more that one resourceType, it contains a single callback URL.
+      example: {"clientID": 99, "programID": 999, "resourceOperations": []}
+      required:
+        - clientID
+        - programID
+        - resourceOperations
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object modification.
+        programID:
+          $ref: '#/components/schemas/objectID'
+          # ID attribute of program object this event is associated with.
+        resourceOperations:
+          type: array
+          example: [{"resources": ["EVENT", "PROGRAM"], "operations": ["CREATE", "UPDATE"], "callbackUrl": "https://myserver.com/send/callback/here"}]
+          items:
+            type: object
+            description: resource type, operations, and callbackUrl
+            example: {"resources": [PROGRAM, EVENT], "operations": [POST, PUT, DELETE], "callbackUrl": "https://myserver.com/send/callback/here"}
+            properties:
+              resources:
+                type: array
+                example: [PROGRAM, EVENT]
+                items:
+                  type: string
+                  description: resource type to subscribe to.
+                  example: EVENT
+                  enum: [PROGRAM, EVENT, REPORT, SUBSCRIPTION, VEN, RESOURCE]
+                description: list of resource types to subscribe to.
+              operations:
+                type: array
+                example: [POST]
+                items:
+                  type: string
+                  description: resource operation to subscribe to.
+                  example: POST
+                  enum: [POST, PUT, DELETE]
+                description: list of resource operations to subscribe to.
+              callbackUrl:
+                type: string
+                format: uri
+                example: https://myserver.com/send/callback/here
+                description: User provided webhook URL.
+              bearerToken:
+                type: string
+                example: NCEJGI9E8ER9802UT9HUG
+                description: |
+                  User provided token. To avoid custom integrations, callback endpoints
+                  should accept the provided bearer token to authenticate VTN requests
+          description: list of resources and operations to subscribe to.
+    ven:
+      type: object
+      description: |
+        Ven represents a client with the ven role.
+      example: {"venID": 999}
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object modification.
+        venID:
+          type: string
+          example: VENID_0999
+          description: String identifier for VEN. VEN may be configured with ID out-of-band
+        targetValues:
+          type: array
+          items:
+            type: string
+            example: group1
+            description: a string representing a target identifier
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/resource'
+    resource:
+      type: object
+      description: |
+        a resource is an energy device or system subject to control by a VEN.
+      example: {"resourceID": 99}
+      properties:
+        ID:
+          $ref: '#/components/schemas/objectID'
+        createdDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object creation.
+        modificationDateTime:
+          type: string
+          example: 01012022:010000
+          description: server provisions timestamp on object modification.
+        resourceID:
+          type: string
+          example: RESOURCEID_0999
+          description: String identifier for resource. resource may be configured with ID out-of-band
+        targetValues:
+          type: array
+          items:
+            type: string
+            example: group1
+            description: a string representing a target identifier
+    interval:
+      type: object
+      description: |
+        An object defining a temporal window and a list of payloads.
+        if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod
+      example: {"ID": 0, "payloads": [{"payloadType": "SIMPLE", "values":[0]}]}
+      required:
+        - ID
+        - payloads
+      properties:
+        ID:
+          type: integer
+          format: int32
+          example: 0
+          description: A client generated number assigned an interval object. Not a sequence number.
+          default: 0
+        intervalPeriod:
+          nullable: true
+          $ref: '#/components/schemas/intervalPeriod'
+        payloads:
+          type: array
+          items:
+            $ref: '#/components/schemas/payload'
+          description: An array of payload objects.
+    intervalPeriod:
+      type: object
+      description: Defines temporal aspects of intervals.
+      example: {"start": "2023-02-10T00:00:00.000Z", "duration": "PT1H", "randomizeStart": "PT5S"}
+      properties:
+        start:
+          type: string
+          example: 2001-12-17T09:30:47Z
+          description: The start time of an interval or set of intervals.
+        duration:
+          type: string
+          example: PT1H
+          description: The duration of an interval or set of intervals.
+        randomizeStart:
+          type: string
+          nullable: true
+          example: PT5M
+          description: Indicates a randomization time that may applied to start.
+    payload:
+      type: object
+      description: |
+        Represents one or more values associated with a type.
+        E.g. a type of PRICE contains a single float value.
+      example: {"payloadType": "PRICE", "values":[0.17]}
+      required:
+        - payloadType
+        - values
+      properties:
+        payloadType:
+          description: |
+            Enumerated or private string signifying the nature of values.
+            For example, "PRICE" indicates value is to be interpreted as a currency.
+          example: PRICE
+          type: string
+        values:
+            type: array
+            description: A sequence of data points. Most often a singular value such as a price.
+            example: [0.17]
+            items:
+              type: number
+
+    point:
+      type: object
+      description: A pair of floats typically used as a point on an 2 dimensional grid.
+      example: {"x":1, "y":2}
+      properties:
+        x:
+          type: number
+          format: float
+          example: 1.0
+          description: a value on an x axis
+        y:
+          type: number
+          format: float
+          example: 2.0
+          description: a value on a y axis
+    eventPayloadDescriptor:
+      type: object
+      description: |
+        Contextual information used to interpret event payload values.
+        E.g. a PRICE payload simply contains a price value, an
+        associated descriptor provides necessary context such as units and currency.
+      example: {"payloadType": "PRICE", "units": "KWH", "currency": "USD"}
+      properties:
+        payloadType:
+          type: string
+          description: Enumerated or private string signifying the nature of values.
+          example: PRICE
+        units:
+          type: string
+          nullable: true
+          description: units of measure.
+          example: KWH
+        currency:
+          type: string
+          nullable: true
+          description: currency of price payload.
+          example: USD
+    reportPayloadDescriptor:
+      type: object
+      description: |
+        Contextual information used to interpret report payload values.
+        E.g. a USAGE payload simply contains a usage value, an
+        associated descriptor provides necessary context such as units and data quality.
+      example: {"payloadType": "USAGE", "readingType": "DIRECT_READ", "units": "KWH"}
+      properties:
+        payloadType:
+          type: string
+          example: USAGE
+          description: Enumerated or private string signifying the nature of values.
+        readingType:
+          type: string
+          example: DIRECT_READ
+          description: Enumerated or private string signifying the type of reading.
+          default: "DIRECT_READ"
+        units:
+          type: string
+          example: KWH
+          description: units of measure.
+        accuracy:
+          type: number
+          format: float
+          example: 0.0
+          description: a quantification of the accuracy of a set of payload values
+        confidence:
+          type: integer
+          format: int32
+          example: 100
+          description: a quantification of the confidence in a set of payload values
+    reportDescriptor:
+      # TBD - add link to OpenADR REST User Guide
+      type: object
+      description: |
+        An obect that may be used to request a report from a VEN.
+        See OpenADR REST User Guide for detailed description of how configure a report request
+      example: {"payloadType": "USAGE", "readingType": "DIRECT_READ", "reportingRate": "PT1D", "targets": None}
+      required:
+        - payloadType
+      properties:
+        payloadType:
+          type: string
+          description: Enumerated or private string signifying the nature of values.
+          example: USAGE
+        readingType:
+          type: string
+          description: Enumerated or private string signifying the type of reading.
+          example: DIRECT_READ
+        targets:
+          type: array
+          description: An array of target objects.
+          example: [{"type": "ei:venid", "ID": "VENID999"}]
+          items:
+            $ref: '#/components/schemas/target'
+        aggregate:
+          type: boolean
+          description: |
+            True if report should aggregate results from all targeted resources
+            False if report includes results for each resource
+          example: false
+          default: false
+        startInterval:
+          type: integer
+          format: int32
+          description: |
+            The interval on which to generate a report.
+            -1 indicates generate report at end of last interval
+          example: -1
+          default: -1
+        numIntervals:
+          type: integer
+          format: int32
+          description: |
+            The number of intervals to include in a report.
+            -1 indicates that all intervals are to be included
+          example: -1
+          default: -1
+        historical:
+          type: boolean
+          description: |
+            True indicates report on intervals preceding startInterval.
+            False indcates report on intervals folowing startInterval (e.g. forecast).
+          example: true
+          default: true
+        frequency:
+          type: integer
+          format: int32
+          description: |
+            Number of intervals that elapse between reports.
+            -1 indicates same as numIntervals
+          example: -1
+          default: -1
+        repeat:
+          type: integer
+          format: int32
+          description: |
+            Number of times to repeat report.
+            1 indicates generate one report
+            -1 indicates repeat indefinitely
+          example: 1
+          default: 1
+    target:
+      type: object
+      description: Indicates a type of target and correspnding reasoure ID.
+      example: {"targetType": "VEN_ID", "values": ["VENID999"]}
+      properties:
+        targetType:
+          type: string
+          example: VEN_ID
+          description: Enumerated or private string signifying the type of target.
+        values:
+          type: array
+          items:
+            type: string
+          example: ["VENID999"]
+          description: |
+            a sequence of targeting values.
+            Most often a singular value such as a resourceID,
+            but could be a list of GPS coordinates or other.
+    objectID:
+        type: string
+        example: "abcdef"
+        description: VTN assigned object ID
+    notification:
+      type: object
+      description: the object that is the subject of the notification
+      example: {"objectType": EVENT, "operation": POST, "object": {}}
+      properties:
+        objectType:
+          type: string
+          enum: [PROGRAM, EVENT, REPORT, SUBSCRIPTION, VEN, RESOURCE]
+          example: EVENT
+          description: type of object being returned, i.e. PROGRAM, EVENT, REPORT
+        operation:
+          type: string
+          enum: [POST, PUT, DELETE]
+          example: POST
+          description: the operation on on object that triggered the notification
+        object:
+          type: object
+          description: the object that is the subject of the notification
+          example: {}
+          oneOf: [
+            $ref: '#/components/schemas/program',
+            $ref: '#/components/schemas/report',
+            $ref: '#/components/schemas/event',
+            $ref: '#/components/schemas/subscription',
+            $ref: '#/components/schemas/ven',
+            $ref: '#/components/schemas/resource'
+          ]
+    problem:
+      type: object
+      description: |
+        reusable error reponse. From https://opensource.zalando.com/problem/schema.yaml
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            An absolute URI that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+          example: 'https://zalando.github.io/problem/constraint-violation'
+        title:
+          type: string
+          description: |
+            A short, summary of the problem type. Written in english and readable
+            for engineers (usually not suited for non technical stakeholders and
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: |
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description: |
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Connection to database timed out
+        instance:
+          type: string
+          format: uri
+          description: |
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: Client credential flow
+      # x-tokenInfoFunc: auth.verifyToken
+      flows:
+        clientCredentials:
+          tokenUrl: auth/token
+          scopes:
+            read_all: VENs and BL can read all resources
+            write_programs: Only BL can write to programs
+            write_events: Only BL can write to events
+            write_reports: only VENs can write reports
+            write_subscriptions: only VENs can write subscriptions
+            write_vens: VENS and BL can write to vens and resources
